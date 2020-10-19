@@ -85,11 +85,6 @@ class Attendee {
           ATRISKFACULTYINFECTED += 1 ;
         }
       }
-      if (isStudent) {
-        ALLSTUDENTSINFECTED += 1;
-      } else {
-        ALLFACULTYINFECTED += 1 ;
-      }
     } else if (! "infected".equals(infectStatus)) {
       this.infectStatus = infectStatus ;
       stopSpreadingIt = -1 ;

@@ -14,12 +14,6 @@ class Class implements Comparable<Class> {
   Set<Class> edges = new HashSet<Class>(); //see also global Edges owned by a pair of classes
   int infectedCount = 0 ;
   float X = 0, Y = 0, Z = 0 ;
-  // ALEXIS:
-  float PolarX = 0, PolarY = 0, PolarZ = 0 ;  // These are Cartesian coordinates Xlated from Polar coordinates.
-  float PolarAngle = 0 ; //temporary angle around circle in degrees
-  float PolarRadius = 0 ;  // temporary radius between 0.0 amd 1.0
-  //Convert PolarAngle, PolarRadius TO PolarX, PolarY in setAngleRadiusZ()
-  
   Class (String ID, String courseName, String instructor, String mode, String room, 
       String days, String time) {
     this.ID = ID.trim() ;
@@ -122,17 +116,10 @@ class Class implements Comparable<Class> {
     Y = y ;
     Z = z ;
   }
-  // ALEXIS:
-  void setAngleRadiusZ(float angleInDegrees, float unitRadius, float Z) {
-    // Store these in float PolarAngle, PolarRadius, PolarZ
-    // Convert those first two into PolarX, PolarY
-  }
-  
   void display() {
-    final float mididiscord = 40.0 ;
-    final float midiaccord = 100.0 ;
-    push(); 
-    // ALEXIS if global cartesian do the following translate(X,Y,Z), else translate(PolarX, PolarY, PolarZ)
+    final float mididiscord = 90.0 ;
+    final float midiaccord = 127.0 ;
+    push();
     translate(X,Y,Z);
     stroke(255);
     fill(255);

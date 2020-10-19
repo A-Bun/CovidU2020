@@ -38,7 +38,6 @@ class EdgeStudents {
       students += delta ;
       // avoid the 0 at log(1), use log-base 2 for information-bits scaling
       strokeWeight = (int) max((float)(Math.ceil(Math.log(students+1) / Math.log(2.0))), 1.0);
-      // DEBUG DEMO strokeWeight = max(1, students);
     }
   }
 };

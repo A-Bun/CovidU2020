@@ -172,8 +172,6 @@ Attendee [] initSimulationState(float R0, Integer seed) {
   TOTALINFECTED = 0 ;
   ATRISKFACULTYINFECTED = 0;
   ATRISKSTUDENTSINFECTED = 0;
-  ALLFACULTYINFECTED = 0;
-  ALLSTUDENTSINFECTED = 0;
   COMMUNITYINFECTED = 0 ;
   Attendee [] attype = new Attendee [0];
   if (seed != null) {
@@ -204,13 +202,7 @@ Attendee [] initSimulationState(float R0, Integer seed) {
     if ((p.isStudent && (norm <= StudentsAtRisk))
         || ((! p.isStudent) && (norm <= InstructorsAtRisk))) {
        p.setAgeRiskBin(true);
-       if (p.isStudent) {
-         ATRISKSTUDENTSINFECTED++;
-         ALLSTUDENTSINFECTED++;
-       } else {
-         ATRISKFACULTYINFECTED++; // DEBUG
-         ALLFACULTYINFECTED++;
-      }
+       if (p.isStudent) ATRISKSTUDENTSINFECTED++; else ATRISKFACULTYINFECTED++; // DEBUG
     } else {
       p.setAgeRiskBin(false);
     }
@@ -272,8 +264,6 @@ Attendee [] initSimulationState(float R0, Integer seed) {
   // println("DEBUG ARS=" + ATRISKSTUDENTSINFECTED + " ARF=" + ATRISKFACULTYINFECTED);
   ATRISKSTUDENTSINFECTED = 0 ;
   ATRISKFACULTYINFECTED = 0 ;
-  ALLSTUDENTSINFECTED = 0 ;
-  ALLFACULTYINFECTED = 0 ;
   return people.toArray(attype) ;
 }
 

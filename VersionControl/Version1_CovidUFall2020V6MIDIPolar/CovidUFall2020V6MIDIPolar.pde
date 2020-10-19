@@ -16,9 +16,9 @@
 // See License.pde tab for the Creative Commons 4.0 open source license.
 import java.util.* ;
 /********  PRIMARY SIMULATION CONFIG PARAMETERS  **********************/
-float R0 = .81  ;        // infection rate in classroom
-float R0cheaters = 1.5  ;  // infection rate in careless social & party settings
-final float percentCheaters = 0.15 ;  // percentage of Attendees cheating to R0cheaters
+float R0 = .81   ;        // infection rate in classroom
+float R0cheaters = 1.15  ;  // infection rate in careless social & party settings
+final float percentCheaters = 0.1 ;  // percentage of Attendees cheating to R0cheaters
 final float cheatersPerMeeting = 7 ;  // Limit "class size" of a community session.
 // cheatersPerMeeting = 7, -1 means only 1 Community super-spreader object.
 // "Two houses on Thursday four on Friday and one on Saturday.
@@ -27,7 +27,7 @@ final float cheatersPerMeeting = 7 ;  // Limit "class size" of a community sessi
 // a half a dozen smaller one occasional parties and of course holidays and special occasions." impact those numbers
 final float cheatersPerTownParty = 80 ; // 80 conservative estimate based on resident responses
 final int numTownParties = 6 ;  // 6, a Kutztown policeman told me 7 or 8 big ones, see above.
-final float facultyRequestingNoF2F = 0. ; //.4 based on mid August, .65 based on September
+final float facultyRequestingNoF2F = 0.4 ; //0.52, based on APSCUF-KU survey, .33 base on HR requests
 final float studentsRequestingNoF2F=.0 ;
 int MinimumStartingInfected = 1 ;
 // (1.0 / 325.0) * 5662.0 = .0031 * 5662 = 17
@@ -38,27 +38,6 @@ int MinimumStartingInfected = 1 ;
 // Base MinimumStartingInfected on (numCSCInfect/numCSC)*numAll
 /**********************************************************************/
 /* Example runs:
-  Asymptomatic = .25  The CDC Director estimates that as many as 25% of infected people may be asymptomatic.
-  This parameter interacts with InfectiousWeeks.
-  S. Whitehead, "CDC Director On Models For The Months To Come: 'This Virus Is Going To Be With Us'".
-  https://www.npr.org/sections/health-shots/2020/03/31/824155179/cdc-director-on-models-for-the-months-to-come-this-virus-is-going-to-be-with-us
-  WHO:
-  For COVID-19, data to date suggest that 80% of infections are mild or asymptomatic,
-  15% are severe infection, requiring oxygen and 5% are critical infections, requiring ventilation.
-
-  // Risk updated from 15% to 25% (faculty/staff) and 1.5% to 2.5% (students) per these web sites.
-  // July 10, 2020:
-  // https://www.kff.org/coronavirus-covid-19/issue-brief/how-many-teachers-are-at-risk-of-serious-illness-if-infected-with-coronavirus/?fbclid=IwAR3kl6Sp4QE-RAhwTOppatFRvY0DPEW_e2Q_bD7jOcmJ35Ah8vspnjJfDJw
-  // June 15, 2020
-  // https://www.kff.org/coronavirus-covid-19/issue-brief/almost-one-in-four-adult-workers-is-vulnerable-to-severe-illness-from-covid-19/?fbclid=IwAR2bZt9_-w_vAzsGJik8FiLtUETmKCH5Ts9ciT38uex5vg4dIwjQCFSQOJM
-
-  Sept 24, NOT ACCOUNTING FOR ASYMPTOMATIC INFECTIONS:
-  R0=.81    R0cheaters=1.15   percentCheaters=.1    facultyRequestingNoF2F=.4       cheatersPerMeeting = 7
-  R0=.81    R0cheaters=1.15   percentCheaters=.1    facultyRequestingNoF2F=.65      cheatersPerMeeting = 7
-  R0=.81    R0cheaters=1.15   percentCheaters=.15   facultyRequestingNoF2F=.65      cheatersPerMeeting = 7
-  R0=.81    R0cheaters=2.00   percentCheaters=.15   facultyRequestingNoF2F=.65      cheatersPerMeeting = 7
-  
-  July 16:
   R0=.81   R0cheaters=1.1   percentCheaters=.00    facultyRequestingNoF2F=0       cheatersPerMeeting = 7
   R0=.81   R0cheaters=1.1   percentCheaters=.10    facultyRequestingNoF2F=0       cheatersPerMeeting = -1
   R0=.81   R0cheaters=1.1   percentCheaters=.10    facultyRequestingNoF2F=0       cheatersPerMeeting = 7
@@ -91,7 +70,6 @@ int framesInaWeek = 15 ;  // goes up for 'M' MIDI
 int currentFrame = 0 ;
 int currentRunWithTheseConfigParameters = 0 ;
 int TOTALINFECTED = 0, ATRISKFACULTYINFECTED = 0, ATRISKSTUDENTSINFECTED = 0 ;
-int ALLFACULTYINFECTED = 0, ALLSTUDENTSINFECTED = 0 ;
 int COMMUNITYINFECTED = 0 ;
 // Cheaters visit Community Class, below, where R0cheaters applies.
 Map<String,Attendee> Faculty = new HashMap<String,Attendee>(); // faculty name to Attendee
@@ -160,7 +138,6 @@ void setup() {
   heightper = height / perside  ;
   depthper = max(widthper,heightper) ;
   */
-  // ALEXIS: START OF CARTESIAN LAYOUT
   int znow = 0 ;
   int widthnow = (widthper / 2) - (width/2) ;    // account for translate to center
   int heightnow = (heightper / 2) - (height/2) ;
@@ -218,10 +195,6 @@ void setup() {
       }
     }
   }
-  // ALEXIS: END OF CARTESIAN LAYOUT
-  // ALEXIS: START OF POLAR LAYOUT
-  
-  // ALEXIS: END OF POLAR LAYOUT
       
   int DEBUGMISS1 = 0 ;
   for (Class c : Session.values()) {
@@ -263,7 +236,7 @@ void draw() {
   textSize(32 * ratio1080p);
   strokeWeight(1);
   moveCameraRotateWorldKeys();
-  translate(width/2, height/2, 0 /* depth/2 */);  // 0,0 is at middle of the display
+  translate(width/2, height/2, depth/2);  // 0,0 is at middle of the display
   for (Class c : SortedSessions) {
     c.display();
     // print("DEBUG EDGES " + c.ID + ":" + c.edges.size());
@@ -283,31 +256,27 @@ void draw() {
     text("RUNS " + currentRunWithTheseConfigParameters 
       + " WEEK " + (statsweek) + " R0classroom=" + R0 + " R0cheaters=" + R0cheaters
       + " %cheat=" + percentCheaters + " infected=" + TOTALINFECTED
-      + " infectedInClass?=" + (TOTALINFECTED-COMMUNITYINFECTED) + "\n"
+      + " infectedInClass=" + (TOTALINFECTED-COMMUNITYINFECTED) + "\n"
       + " careless groupsize=" + ((int)cheatersPerMeeting) + " town party size="
       + ((int)cheatersPerTownParty) + " # weekly town parties=" 
       + ((int)numTownParties)
       + " faculty online=" + (facultyRequestingNoF2F*100) + "%\n"
       
      
-      + " atriskFacultyInfected=" + ATRISKFACULTYINFECTED
-      + "/" + ALLFACULTYINFECTED + ":I"
-      + " atriskStudentsInfected=" + ATRISKSTUDENTSINFECTED 
-      + "/" + ALLSTUDENTSINFECTED + ":I"
+      + " atriskFacultyInfected=" + ATRISKFACULTYINFECTED 
+      + " (" + (ATRISKFACULTYINFECTED*4) + " courses)"
+      + " atriskStudentsInfected="
+      + ATRISKSTUDENTSINFECTED 
       + " fac=" + Faculty.keySet().size() + " stu=" + Students.keySet().size()
       + " starters = " + MinimumStartingInfected
       + "\nMEAN[" + statsweek + "] infected=" + TOTALINFECTEDMEAN[statsweek] 
-      + " infectedInClass?=" + infectedInClassMEAN[statsweek]
+      + " infectedInClass=" + infectedInClassMEAN[statsweek]
       + " atriskFacultyInfected=" + atriskFacultyInfectedMEAN[statsweek] 
-      + "/" + allFacultyInfectedMEAN[statsweek] + ":I"
       + " atriskStudentsInfected=" + atriskStudentsInfectedMEAN[statsweek]
-      + "/" + allStudentsInfectedMEAN[statsweek] + ":I"
       + "\nMAX[" + statsweek + "] infected=" + TOTALINFECTEDMAX[statsweek] 
-      + " infectedInClass?=" + infectedInClassMAX[statsweek]
-      + " atriskFacultyInfected=" + atriskFacultyInfectedMAX[statsweek]
-      + "/" + allFacultyInfectedMAX[statsweek] + ":I"
-      + " atriskStudentsInfected=" + atriskStudentsInfectedMAX[statsweek]
-      + "/" + allStudentsInfectedMAX[statsweek] + ":I",
+      + " infectedInClass=" + infectedInClassMAX[statsweek]
+      + " atriskFacultyInfected=" + atriskFacultyInfectedMAX[statsweek] 
+      + " atriskStudentsInfected=" + atriskStudentsInfectedMAX[statsweek],
       900*ratio1080p, (height-150), 50);
       // xeye, yeye, (zeye < 0) ? zeye - 1000 : zeye+1000);
   }
@@ -330,9 +299,7 @@ void CSVdump() {
         + "town party size,weekly town parties,faculty % online,facultyF2F,studentsF2F,starters,"
         + "meaninfected,meaninfectedinclass,maxinfected,maxinfectedinclass,"
         + "meanatriskFacultyInfected,meanatriskStudentsInfected,"
-        + "maxatriskFacultyInfected,maxatriskStudentsInfected,"
-        + "meanallFacultyInfected,meanallStudentsInfected,"
-        + "maxallFacultyInfected,maxallStudentsInfected");
+        + "maxatriskFacultyInfected,maxatriskStudentsInfected");
     }
   } catch (java.io.FileNotFoundException fnx) {
     println("ERROR, Cannot create file " + fname);
@@ -347,9 +314,7 @@ void CSVdump() {
       +TOTALINFECTEDMEAN[statsweek]+","+infectedInClassMEAN[statsweek]+","
       +TOTALINFECTEDMAX[statsweek]+","+infectedInClassMAX[statsweek]+","
       +atriskFacultyInfectedMEAN[statsweek]+","+atriskStudentsInfectedMEAN[statsweek]+","
-      +atriskFacultyInfectedMAX[statsweek]+","+atriskStudentsInfectedMAX[statsweek]+","
-      +allFacultyInfectedMEAN[statsweek]+","+allStudentsInfectedMEAN[statsweek]+","
-      +allFacultyInfectedMAX[statsweek]+","+allStudentsInfectedMAX[statsweek]);
+      +atriskFacultyInfectedMAX[statsweek]+","+atriskStudentsInfectedMAX[statsweek]);
   }
   CSVwriter.flush();
 }
@@ -362,19 +327,12 @@ int [] atriskFacultyInfectedMEAN = new int [ weeksInCycle+1 ];
 int [] atriskFacultyInfectedMAX = new int [ weeksInCycle+1 ];
 int [] atriskStudentsInfectedMEAN = new int [ weeksInCycle+1 ]; 
 int [] atriskStudentsInfectedMAX = new int [ weeksInCycle+1 ];
-int [] allFacultyInfectedMEAN = new int [ weeksInCycle+1 ]; 
-int [] allFacultyInfectedMAX = new int [ weeksInCycle+1 ];
-int [] allStudentsInfectedMEAN = new int [ weeksInCycle+1 ]; 
-int [] allStudentsInfectedMAX = new int [ weeksInCycle+1 ];
-
 void advanceStatsPerWeek(int statsweek) {
   if (currentRunWithTheseConfigParameters == 0) {
     TOTALINFECTEDMEAN[statsweek] = TOTALINFECTED ;
     infectedInClassMEAN[statsweek] = (TOTALINFECTED-COMMUNITYINFECTED) ;
     atriskFacultyInfectedMEAN[statsweek] = ATRISKFACULTYINFECTED ;
-    allFacultyInfectedMEAN[statsweek] = ALLFACULTYINFECTED ;
     atriskStudentsInfectedMEAN[statsweek] = ATRISKSTUDENTSINFECTED ;
-    allStudentsInfectedMEAN[statsweek] = ALLSTUDENTSINFECTED ;
   } else {
     TOTALINFECTEDMEAN[statsweek] = round(((TOTALINFECTEDMEAN[statsweek] * (statsweek-1.0)) + TOTALINFECTED)
       / statsweek);
@@ -383,19 +341,13 @@ void advanceStatsPerWeek(int statsweek) {
       / statsweek);
     atriskFacultyInfectedMEAN[statsweek] = round(((atriskFacultyInfectedMEAN[statsweek] * (statsweek-1.0)) 
       + ATRISKFACULTYINFECTED) / statsweek);
-    allFacultyInfectedMEAN[statsweek] = round(((allFacultyInfectedMEAN[statsweek] * (statsweek-1.0)) 
-      + ALLFACULTYINFECTED) / statsweek);
     atriskStudentsInfectedMEAN[statsweek] = round(((atriskStudentsInfectedMEAN[statsweek] * (statsweek-1.0)) 
       + ATRISKSTUDENTSINFECTED) / statsweek);
-    allStudentsInfectedMEAN[statsweek] = round(((allStudentsInfectedMEAN[statsweek] * (statsweek-1.0)) 
-      + ALLSTUDENTSINFECTED) / statsweek);
   }
   TOTALINFECTEDMAX[statsweek] = max(TOTALINFECTEDMAX[statsweek],TOTALINFECTED);
   infectedInClassMAX[statsweek] = max(infectedInClassMAX[statsweek], (TOTALINFECTED-COMMUNITYINFECTED));
   atriskFacultyInfectedMAX[statsweek] = max(atriskFacultyInfectedMAX[statsweek], ATRISKFACULTYINFECTED);
   atriskStudentsInfectedMAX[statsweek] = max(atriskStudentsInfectedMAX[statsweek], ATRISKSTUDENTSINFECTED);
-  allFacultyInfectedMAX[statsweek] = max(allFacultyInfectedMAX[statsweek], ALLFACULTYINFECTED);
-  allStudentsInfectedMAX[statsweek] = max(allStudentsInfectedMAX[statsweek], ALLSTUDENTSINFECTED);
   
 }
 
@@ -409,10 +361,6 @@ void zeroWeeklyStats() {
   Arrays.fill(atriskFacultyInfectedMAX, 0);
   Arrays.fill(atriskStudentsInfectedMEAN, 0);
   Arrays.fill(atriskStudentsInfectedMAX, 0);
-  Arrays.fill(allFacultyInfectedMEAN, 0);
-  Arrays.fill(allFacultyInfectedMAX, 0);
-  Arrays.fill(allStudentsInfectedMEAN, 0);
-  Arrays.fill(allStudentsInfectedMAX, 0);
   currentRunWithTheseConfigParameters = 0 ;
 }
 
