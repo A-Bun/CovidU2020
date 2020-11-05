@@ -78,6 +78,7 @@ final float height1080p = 1080 ;
 float ratio1080p = 1 ;  // scaled for display after size()
 // GLOBAL DATABASE
 boolean SkipAbsentAttendees = false ;
+boolean isCartesian = false; // ALEXIS addition
 String classesCSV = "CLASS_SOME_INPERSON_ROOM_16May2020_Encrypt.csv";
 String studentsCSV = "ALL_ROSTER_CLASS_STUDENT_ENCRYPT.csv";
 String coursenumMap = "CourseNum2Name.csv"; // added 7/2/2020 to tag course name & section
@@ -140,8 +141,8 @@ PrintWriter CSVwriter = null ;
 boolean CSVpending = false ;
 
 void setup() {
-  // size(1900,1060,P3D);
-  fullScreen(P3D);
+   size(1900,1060,P3D);
+//fullScreen(P3D);
   frameRate(60);
   ratio1080p = width / width1080p ;
   background(0);
@@ -150,79 +151,141 @@ void setup() {
   fill(255);
   stroke(255);
   textSize(32 * ratio1080p);
-  int widthper = width / 10 ; // sqrtSortedRooms ;
-  int heightper = height / 10 ; // sqrtSortedRooms ;
-  int depthper = widthper * 2 ;
-  /* Experiment 7/11/2020 */
-  /*
-  int perside = (int)(java.lang.Math.sqrt(courseName2Class.keySet().size()));
-  widthper = width / perside ;
-  heightper = height / perside  ;
-  depthper = max(widthper,heightper) ;
-  */
+  
+  int depthper = (width/10) * 2 ;
   // ALEXIS: START OF CARTESIAN LAYOUT
-  int znow = 0 ;
-  int widthnow = (widthper / 2) - (width/2) ;    // account for translate to center
-  int heightnow = (heightper / 2) - (height/2) ;
-  for (String r : courseName2Class.keySet()) {
-    for (int dix = 0 ; dix < DaysOrderedList.length ; dix++) {
-      for (int h : SortedHours) {
-        String key = r + "@" + dix + "@" + h ;
-        Class c = deptHourToClass.get(key);
-        if (c != null && ! c.courseName.startsWith("community")) {
-          // sort community to the back
-          c.setXYZ(widthnow, heightnow, znow);
-          widthnow += widthper ;
-          if (widthnow >= width/2) {
-            widthnow = (widthper / 2) - (width/2) ;
-            heightnow += heightper;
-            if (heightnow >= height/2) {
-              heightnow = (heightper / 2) - (height/2);
-              znow -= depthper ;
-              depth++ ;
+    int widthper = width / 10 ; // sqrtSortedRooms ;
+    int heightper = height / 10 ; // sqrtSortedRooms ;
+    /* Experiment 7/11/2020 */
+    /*
+    int perside = (int)(java.lang.Math.sqrt(courseName2Class.keySet().size()));
+    widthper = width / perside ;
+    heightper = height / perside  ;
+    depthper = max(widthper,heightper) ;
+    */
+    int znow = 0 ;
+    int widthnow = (widthper / 2) - (width/2) ;    // account for translate to center
+    int heightnow = (heightper / 2) - (height/2) ;
+    for (String r : courseName2Class.keySet()) {
+      for (int dix = 0 ; dix < DaysOrderedList.length ; dix++) {
+        for (int h : SortedHours) {
+          String key = r + "@" + dix + "@" + h ;
+          Class c = deptHourToClass.get(key);
+          if (c != null && ! c.courseName.startsWith("community")) {
+            // sort community to the back
+            c.setXYZ(widthnow, heightnow, znow);
+            widthnow += widthper ;
+            if (widthnow >= width/2) {
+              widthnow = (widthper / 2) - (width/2) ;
+              heightnow += heightper;
+              if (heightnow >= height/2) {
+                heightnow = (heightper / 2) - (height/2);
+                znow -= depthper ;
+                depth++ ;
+              }
             }
           }
-        }
-      } 
+        } 
+      }
     }
-  }
-  // When reorging by matrix, some slip thru the geometry, add them in
-  for (Class c : Session.values()) {
-    if (c.X == 0 && c.Y == 0 && c.Z == 0 && ! c.courseName.startsWith("community")) {
-      c.setXYZ(widthnow, heightnow, znow);
-      widthnow += widthper ;
-      if (widthnow >= width/2) {
-        widthnow = (widthper / 2) - (width/2) ;
-        heightnow += heightper;
-        if (heightnow >= height/2) {
-          heightnow = (heightper / 2) - (height/2);
-          znow -= depthper ;
-          depth++ ;
+    // When reorging by matrix, some slip thru the geometry, add them in
+    for (Class c : Session.values()) {
+      if (c.X == 0 && c.Y == 0 && c.Z == 0 && ! c.courseName.startsWith("community")) {
+        c.setXYZ(widthnow, heightnow, znow);
+        widthnow += widthper ;
+        if (widthnow >= width/2) {
+          widthnow = (widthper / 2) - (width/2) ;
+          heightnow += heightper;
+          if (heightnow >= height/2) {
+            heightnow = (heightper / 2) - (height/2);
+            znow -= depthper ;
+            depth++ ;
+          }
         }
       }
     }
-  }
-  // Do Community last
-  for (Class c : Session.values()) {
-    if (c.X == 0 && c.Y == 0 && c.Z == 0 && c.courseName.startsWith("community")) {
-      c.setXYZ(widthnow, heightnow, znow);
-      widthnow += widthper ;
-      if (widthnow >= width/2) {
-        widthnow = (widthper / 2) - (width/2) ;
-        heightnow += heightper;
-        if (heightnow >= height/2) {
-          heightnow = (heightper / 2) - (height/2);
-          znow -= depthper ;
-          depth++ ;
+    // Do Community last
+    for (Class c : Session.values()) {
+      if (c.X == 0 && c.Y == 0 && c.Z == 0 && c.courseName.startsWith("community")) {
+        c.setXYZ(widthnow, heightnow, znow);
+        widthnow += widthper ;
+        if (widthnow >= width/2) {
+          widthnow = (widthper / 2) - (width/2) ;
+          heightnow += heightper;
+          if (heightnow >= height/2) {
+            heightnow = (heightper / 2) - (height/2);
+            znow -= depthper ;
+            depth++ ;
+          }
         }
       }
     }
-  }
-  // ALEXIS: END OF CARTESIAN LAYOUT
-  // ALEXIS: START OF POLAR LAYOUT
-  
-  // ALEXIS: END OF POLAR LAYOUT
-      
+   // ALEXIS: END OF CARTESIAN LAYOUT
+      // QUESTION: This slightly works but it is a star and then small cicles
+   // ALEXIS: START OF POLAR LAYOUT
+  // make an angleper = 360.0/10.0, radiusper = 0.1 (1.0/10), znow
+    float angleper = 360.0/10.0; //tweak these
+    float radiusper = 0.1; //tweak these
+    float anglenow = 0;    // account for translate to center //tweak these
+    //float startAngle = degrees((widthper / 2) - (width/2)) ; // angle of the first placement on the circle
+    float radiusnow = 1.0; // start at 1.0, the outer edge of the circle
+    for (String r : courseName2Class.keySet()) {
+      for (int dix = 0 ; dix < DaysOrderedList.length ; dix++) {
+        for (int h : SortedHours) {
+          String key = r + "@" + dix + "@" + h ;
+          Class c = deptHourToClass.get(key);
+          if (c != null && ! c.courseName.startsWith("community")) {
+            // sort community to the back
+            c.setAngleRadiusZ(anglenow, radiusnow, znow);
+            anglenow += angleper ; // += angleper            // increase the current angle
+            if (anglenow >= 359) {                           // if the current angle >= 359
+              anglenow = 0;
+              radiusnow -= radiusper;                        // decrease the current radius
+              if (radiusnow <= 0.1) {                        // if the current radius is <= 0.1
+                radiusnow = 1.0;                             // reset the current radius to the starting radius
+                znow -= depthper ;                           // decrease the current z
+                depth++ ;
+              }
+            }
+          }
+        } 
+      }
+    }
+   
+    // When reorging by matrix, some slip thru the geometry, add them in
+    for (Class c : Session.values()) {
+      if (c.PolarX == 0 && c.PolarY == 0 && c.PolarZ == 0 && ! c.courseName.startsWith("community")) {
+        c.setAngleRadiusZ(anglenow, radiusnow, znow);
+        anglenow += angleper ; // += angleper            // increase the current angle
+          if (anglenow >= 359) {                           // if the current angle >= 359
+            anglenow = 0;
+            radiusnow -= radiusper;                        // decrease the current radius
+            if (radiusnow <= 0.1) {                        // if the current radius is <= 0.1
+              radiusnow = 1.0;                             // reset the current radius to the starting radius
+              znow -= depthper ;                           // decrease the current z
+              depth++ ;
+          }
+        }
+      }
+    }
+    // Do Community last
+    for (Class c : Session.values()) {
+      if (c.PolarX == 0 && c.PolarY == 0 && c.PolarZ == 0 && c.courseName.startsWith("community")) {
+        c.setAngleRadiusZ(anglenow, radiusnow, znow);
+        anglenow += angleper ; // += angleper            // increase the current angle
+          if (anglenow >= 359) {                           // if the current angle >= 359
+            anglenow = 0;
+            radiusnow -= radiusper;                        // decrease the current radius
+            if (radiusnow <= 0.1) {                        // if the current radius is <= 0.1
+              radiusnow = 1.0;                             // reset the current radius to the starting radius
+              znow -= depthper ;                           // decrease the current z
+              depth++ ;
+          }
+        }
+      }
+    }
+    // ALEXIS: END OF POLAR LAYOUT
+        
   int DEBUGMISS1 = 0 ;
   for (Class c : Session.values()) {
     if (c.X == 0 && c.Y == 0 && c.Z == 0) {
@@ -461,6 +524,10 @@ void keyPressed() {
   } else if (key == 'h') {
     hideText = ! hideText ;
     cmdbuf = "";
+  } else if(key == 'p') { // ALEXIS addition
+    isCartesian = ! isCartesian ;
+    cmdbuf = "";
+    println("cartesian: " + isCartesian);
   } else if (key == 'A') {
     xbackwards = ! xbackwards ;
     cmdbuf = "";

@@ -125,7 +125,21 @@ class Class implements Comparable<Class> {
   // ALEXIS:
   void setAngleRadiusZ(float angleInDegrees, float unitRadius, float Z) {
     // Store these in float PolarAngle, PolarRadius, PolarZ
+    PolarAngle = angleInDegrees;
+    PolarRadius = unitRadius;
+    PolarZ = Z;
+    
     // Convert those first two into PolarX, PolarY
+    float[] polarToCart = polarToCartesian(PolarRadius, radians(PolarAngle));
+    int[] cartToPhys = cartesianToPhysical(polarToCart[1], polarToCart[0]);
+    PolarX = cartToPhys[0];
+    PolarY = cartToPhys[1];
+    
+    // subtract width/2 and height/2 from those answers (possibly)
+    PolarX -= width/2;
+    PolarY -= height/2;
+    println("polarX = " + PolarX);
+    println("polarY = " + PolarY);
   }
   
   void display() {
@@ -133,7 +147,14 @@ class Class implements Comparable<Class> {
     final float midiaccord = 100.0 ;
     push(); 
     // ALEXIS if global cartesian do the following translate(X,Y,Z), else translate(PolarX, PolarY, PolarZ)
-    translate(X,Y,Z);
+    if(isCartesian)
+    {
+      translate(X,Y,Z);
+    }
+    else
+    {
+      translate(PolarX, PolarY, PolarZ);
+    }
     stroke(255);
     fill(255);
     textSize(18 * ratio1080p);
@@ -181,7 +202,14 @@ class Class implements Comparable<Class> {
             bblue = (int)(percentNot * 255.0);
             stroke(0, 0, bblue, 20);
           }
-          line(X, Y, Z, c.X, c.Y, c.Z);
+          if(isCartesian)
+          {
+            line(X, Y, Z, c.X, c.Y, c.Z);
+          }
+          else
+          {
+            line(PolarX, PolarY, PolarZ, c.PolarX, c.PolarY, c.PolarZ);
+          }
         }
       }
       pop();
