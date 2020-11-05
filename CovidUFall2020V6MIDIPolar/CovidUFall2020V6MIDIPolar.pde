@@ -27,7 +27,7 @@ final float cheatersPerMeeting = 7 ;  // Limit "class size" of a community sessi
 // a half a dozen smaller one occasional parties and of course holidays and special occasions." impact those numbers
 final float cheatersPerTownParty = 80 ; // 80 conservative estimate based on resident responses
 final int numTownParties = 6 ;  // 6, a Kutztown policeman told me 7 or 8 big ones, see above.
-final float facultyRequestingNoF2F = 0. ; //.4 based on mid August, .65 based on September
+final float facultyRequestingNoF2F = 0.65 ; //.4 based on mid August, .65 based on September
 final float studentsRequestingNoF2F=.0 ;
 int MinimumStartingInfected = 1 ;
 // (1.0 / 325.0) * 5662.0 = .0031 * 5662 = 17
@@ -141,8 +141,8 @@ PrintWriter CSVwriter = null ;
 boolean CSVpending = false ;
 
 void setup() {
-   size(1900,1060,P3D);
-//fullScreen(P3D);
+  //size(1900,1060,P3D);
+  fullScreen(P3D);
   frameRate(60);
   ratio1080p = width / width1080p ;
   background(0);
@@ -221,13 +221,12 @@ void setup() {
       }
     }
    // ALEXIS: END OF CARTESIAN LAYOUT
-      // QUESTION: This slightly works but it is a star and then small cicles
+   
    // ALEXIS: START OF POLAR LAYOUT
-  // make an angleper = 360.0/10.0, radiusper = 0.1 (1.0/10), znow
+    int polarZnow = 0;
     float angleper = 360.0/10.0; //tweak these
-    float radiusper = 0.1; //tweak these
+    float radiusper = 0.3; //tweak these
     float anglenow = 0;    // account for translate to center //tweak these
-    //float startAngle = degrees((widthper / 2) - (width/2)) ; // angle of the first placement on the circle
     float radiusnow = 1.0; // start at 1.0, the outer edge of the circle
     for (String r : courseName2Class.keySet()) {
       for (int dix = 0 ; dix < DaysOrderedList.length ; dix++) {
@@ -236,14 +235,14 @@ void setup() {
           Class c = deptHourToClass.get(key);
           if (c != null && ! c.courseName.startsWith("community")) {
             // sort community to the back
-            c.setAngleRadiusZ(anglenow, radiusnow, znow);
-            anglenow += angleper ; // += angleper            // increase the current angle
-            if (anglenow >= 359) {                           // if the current angle >= 359
-              anglenow = 0;
-              radiusnow -= radiusper;                        // decrease the current radius
-              if (radiusnow <= 0.1) {                        // if the current radius is <= 0.1
-                radiusnow = 1.0;                             // reset the current radius to the starting radius
-                znow -= depthper ;                           // decrease the current z
+            c.setAngleRadiusZ(anglenow, radiusnow, polarZnow);
+            anglenow += angleper ;                      // increase the current angle
+            if (anglenow >= 359) {                      // if the current angle >= 359
+              anglenow = 0;                             // reset the current angle to the starting angle
+              radiusnow -= radiusper;                   // decrease the current radius
+              if (radiusnow <= 0.1) {                   // if the current radius is <= 0.1
+                radiusnow = 1.0;                        // reset the current radius to the starting radius
+                polarZnow -= depthper ;                 // decrease the current z
                 depth++ ;
               }
             }
@@ -255,14 +254,14 @@ void setup() {
     // When reorging by matrix, some slip thru the geometry, add them in
     for (Class c : Session.values()) {
       if (c.PolarX == 0 && c.PolarY == 0 && c.PolarZ == 0 && ! c.courseName.startsWith("community")) {
-        c.setAngleRadiusZ(anglenow, radiusnow, znow);
-        anglenow += angleper ; // += angleper            // increase the current angle
-          if (anglenow >= 359) {                           // if the current angle >= 359
+        c.setAngleRadiusZ(anglenow, radiusnow, polarZnow);
+        anglenow += angleper ;
+          if (anglenow >= 359) {
             anglenow = 0;
-            radiusnow -= radiusper;                        // decrease the current radius
-            if (radiusnow <= 0.1) {                        // if the current radius is <= 0.1
-              radiusnow = 1.0;                             // reset the current radius to the starting radius
-              znow -= depthper ;                           // decrease the current z
+            radiusnow -= radiusper;
+            if (radiusnow <= 0.1) {
+              radiusnow = 1.0;
+              polarZnow -= depthper ;
               depth++ ;
           }
         }
@@ -271,14 +270,14 @@ void setup() {
     // Do Community last
     for (Class c : Session.values()) {
       if (c.PolarX == 0 && c.PolarY == 0 && c.PolarZ == 0 && c.courseName.startsWith("community")) {
-        c.setAngleRadiusZ(anglenow, radiusnow, znow);
-        anglenow += angleper ; // += angleper            // increase the current angle
-          if (anglenow >= 359) {                           // if the current angle >= 359
+        c.setAngleRadiusZ(anglenow, radiusnow, polarZnow);
+        anglenow += (angleper+9) ;     // changed so community text doesn't overlap in general
+          if (anglenow >= 359) {
             anglenow = 0;
-            radiusnow -= radiusper;                        // decrease the current radius
-            if (radiusnow <= 0.1) {                        // if the current radius is <= 0.1
-              radiusnow = 1.0;                             // reset the current radius to the starting radius
-              znow -= depthper ;                           // decrease the current z
+            radiusnow -= 0.55;         // changed so community text doesn't overlap in general
+            if (radiusnow <= 0.4) {    // changed so community text doesn't overlap when noF2F is 0.65
+              radiusnow = 1.0;
+              polarZnow -= depthper ;
               depth++ ;
           }
         }
